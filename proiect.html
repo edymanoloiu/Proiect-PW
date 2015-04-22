@@ -1,0 +1,281 @@
+<!doctype html>
+<html lang="en">
+<head>
+	<meta charset="utf-8">
+	<title>PW Project</title>
+	
+	<script src="./jquery-1.11.2.min.js"></script>
+	<script src="./jquery.xml2json.js"></script>
+	<link rel="stylesheet" type="text/css" href="./bootstrap/css/bootstrap.min.css">
+	<link rel="stylesheet" type="text/css" href="./bootstrap/css/bootstrap-theme.min.css">
+	<link rel="stylesheet" type="text/css" href="./default.css">
+	<script src="./bootstrap/js/bootstrap.min.js"></script>
+	<script src="./bootbox.min.js"></script>
+	<script src="./attrchange.js"></script>
+	<script src="./jquery.totop.js"></script>
+	<script src="./bootstrap-fileinput/js/fileinput.min.js"></script>
+	<link href="./bootstrap-fileinput/css/fileinput.css" media="all" rel="stylesheet" type="text/css" />
+	<link rel="stylesheet" type="text/css" href="./style.css">
+
+	<script>	
+	var colorsForUsers = new Object();
+	var initialXML = new Object();
+	var initialJSON = new Object();
+	var textFile = null;
+	var refAndID = new Object();
+	var initialRefAndID = new Object();
+	var clickedRefID = 0;
+	var allRefButtonsAreDisabled = false;
+	var rowCount = 0;
+	var buttonClicked = false;
+	var saveTargetFile = new Object();
+	var allRows = 0;
+	var counter = 0;
+	var previousSender = new Object();
+	var displaySide = 0;
+		
+	function getRandomColor(step) {
+		var numOfSteps = 15;
+		var r, g, b;
+		var h = step / numOfSteps;
+		var i = ~~(h * 6);
+		var f = h * 6 - i;
+		var q = 1 - f;
+		switch(i % 6){
+			case 0: r = 1, g = f, b = 0; break;
+			case 1: r = q, g = 1, b = 0; break;
+			case 2: r = 0, g = 1, b = f; break;
+			case 3: r = 0, g = q, b = 1; break;
+			case 4: r = f, g = 0, b = 1; break;
+			case 5: r = 1, g = 0, b = q; break;
+		}
+		var c = "#" + ("00" + (~ ~(r * 255)).toString(16)).slice(-2) + ("00" + (~ ~(g * 255)).toString(16)).slice(-2) + ("00" + (~ ~(b * 255)).toString(16)).slice(-2);
+		return (c);
+	}
+
+	function addNewConversationLine(item){
+		initialRefAndID[item["Utterance"]["genid"]] = item["Utterance"]["ref"];
+		refAndID[item["Utterance"]["genid"]] = item["Utterance"]["ref"];
+		var newLine = "";		
+		if(previousSender == item["nickname"]){
+			console.log(previousSender);
+			if(displaySide == 1)
+				newLine = "<li class=\"dialogLine\" value=" + item["Utterance"]["genid"]+ "><div class=\"timeline-badge info " + item["nickname"] + "\"><i class=\"glyphicon glyphicon-check\"></i></div>";
+			else
+				newLine = "<li class=\"timeline-inverted dialogLine\" value=" + item["Utterance"]["genid"] + "><div class=\"timeline-badge success " + item["nickname"] + "\"><i class=\"glyphicon glyphicon-check\"></i></div>";
+		}else{			
+			if(displaySide == 0){
+				displaySide = 1;
+				newLine = "<li class=\"dialogLine\" value=" + item["Utterance"]["genid"] + "><div class=\"timeline-badge info " + item["nickname"] + "\"><i class=\"glyphicon glyphicon-check\"></i></div>";	
+			}
+			else{
+				displaySide = 0;
+				newLine = "<li class=\"timeline-inverted dialogLine\" value=" + item["Utterance"]["genid"] + "><div class=\"timeline-badge success " + item["nickname"] + "\"><i class=\"glyphicon glyphicon-check\"></i></div>";
+			}
+		}
+		
+		newLine += "<div class=\"timeline-panel\"><div class=\"timeline-heading\">";
+		newLine += "<h4 class=\"timeline-title\">#" + item["Utterance"]["genid"] + " " + item["nickname"] + "</h4>";
+		newLine += "<p><small class=\"text-muted\"><i class=\"glyphicon glyphicon-time\"></i>" + item["Utterance"]["time"] + "</small></p></div>";
+		newLine += "<div class=\"timeline-body\">";
+		newLine += "<p class=\"dialogText\">" + item["Utterance"]["text"] + "</p><br>";
+		newLine += "<textarea class=\"refID\" title=\"linkedRef\" disabled rows=\"1\" cols=\"5\"> " + item["Utterance"]["ref"] + "</textarea>";
+		newLine += "<button class=\"linkRef btn btn-primary\" onclick=\"linkRef(" + item["Utterance"]["genid"] + ")\"> Link to dialog line </button>";
+		newLine += "</div></div></li>";			
+		$('.' + item["nickname"]).css("background-color",colorsForUsers[item["nickname"]]);
+		
+		$("#dialogList").append(newLine);
+		previousSender = item["nickname"];		
+	}
+
+	function linkRef(clickedRef){
+		clickedRefID = clickedRef;
+		$(".linkRef").each(function(){
+			$(this).attr("disabled","disabled");
+		});
+		allRefButtonsAreDisabled = true;
+		buttonClicked = true;
+	}
+	
+	function sleep(milliseconds) {
+		var start = new Date().getTime();
+		for (var i = 0; i < 1e7; i++) {
+			if ((new Date().getTime() - start) > milliseconds){
+				break;
+			}
+		}	
+	}
+	
+	/*(function($) {
+		var origAppend = $.fn.append;
+
+		$.fn.append = function () {
+			return origAppend.apply(this, arguments).trigger("append");
+		};
+	})(jQuery);*/
+		
+	$(document).ready(function(){
+		document.getElementById('file-input').addEventListener('change', saveTargetFileEvent, false);		
+		
+		$('#processing').on("click",function(){
+			readSingleFile(saveTargetFile);
+		});
+		
+		var create = document.getElementById('create');
+		create.addEventListener('click', function () {
+			var link = document.getElementById('downloadlink');
+			link.href = saveXML();
+			link.style.display = 'block';
+		}, false);		
+		
+		$('#processing-modal').on('shown.bs.modal', function () {
+			sleep(5000);
+			$('#processing-modal').modal('hide');
+		});
+		
+		/*$("#processing-modal").attrchange({
+			trackValues: true, // set to true so that the event object is updated with old & new values
+			callback: function(evnt) {				
+				if(evnt.attributeName == "style") { // which attribute you want to watch for changes
+					//console.log(evnt);
+					if(evnt.newValue == "display: block;"){
+					}
+				}
+			}
+		});
+		
+		$("#dialogDiv").bind("append", function() {
+			counter++;
+			if(counter == allRows)
+				sleep(1000);
+		});*/
+		
+		$("body").on("click", ".dialogLine", function(){
+			var thisRefID = $(this).attr('value');		
+			if(allRefButtonsAreDisabled && thisRefID != clickedRefID){
+				bootbox.confirm("You linked ref #" + clickedRefID + " to ref #" + thisRefID + " ?", function(result) {
+					if(result){	
+						$(".dialogLine").each(function(){
+							if($(this).attr('value') == clickedRefID){	
+								$($($(this).children()[1]).children()[1]).children().each(function(){
+									if($(this).attr('title') == 'linkedRef')
+										$(this).val(thisRefID);
+									refAndID[clickedRefID] = thisRefID;
+								});
+							}
+						});
+					}
+				}); 
+				allRefButtonsAreDisabled = false;
+				$(".linkRef").each(function(){
+					$(this).removeAttr("disabled");
+				});
+			}
+		});
+		
+		$('#totopscroller').totopscroller({
+			showToBottom: true,
+			showToPrev: true,
+			link: false,
+			linkTarget: '_self',
+			toTopHtml: '<a href="#"></a>',
+			toBottomHtml: '<a href="#"></a>',
+			toPrevHtml: '<a href="#"></a>',
+			linkHtml: '<a href="#"></a>',
+			toTopClass: 'totopscroller-top',
+			toBottomClass: 'totopscroller-bottom',
+			toPrevClass: 'totopscroller-prev',
+			linkClass: 'totopscroller-lnk',
+		});
+    });
+	
+	function saveTargetFileEvent(e){
+		saveTargetFile = e;
+	}
+	
+	function readSingleFile(e) {
+		var file = e.target.files[0];
+		if (!file) {
+			return;
+		}
+		var reader = new FileReader();
+		reader.onload = function(e) {
+			var contents = e.target.result;
+			displayConversation(contents);
+		};
+		reader.readAsText(file);
+	}
+
+	function displayConversation(contents) {
+		$("#dialogDiv").empty();
+		colorsForUsers = new Object();
+		initialXML = new Object();
+		initialJSON = new Object();
+		textFile = null;
+		refAndID = new Object();
+		initialRefAndID = new Object();
+		clickedRefID = 0;
+		allRefButtonsAreDisabled = false;
+		rowCount = 0;
+		buttonClicked = false;
+		initialXML = contents;
+		var jsonFromXML = $.xml2json(contents);
+		initialJSON = jsonFromXML;
+		var user = 0;
+		var bodyObject = jsonFromXML["Body"]["Turn"];
+		allRows = bodyObject.length;
+		$.each(bodyObject, function(i, item) {
+			if(!colorsForUsers[item["nickname"]]){
+				user++;
+				colorsForUsers[item["nickname"]] = getRandomColor(user);
+			}			
+			addNewConversationLine(item);
+		});
+	}
+		
+    function saveXML(){		
+		$.each(refAndID,function(i,item){
+			var initialValue = "genid=\"" + i + "\" ref=\"" + initialRefAndID[i].trim() + "\"";
+			var newValue = "genid=\"" + i + "\" ref=\"" + item.trim() + "\"";
+			initialXML = initialXML.replace(initialValue,newValue);
+		});
+		var data = new Blob([initialXML], {type: 'text/xml'});
+		if (textFile !== null) {
+			window.URL.revokeObjectURL(textFile);
+		}
+
+		textFile = window.URL.createObjectURL(data);
+
+		return textFile;
+    }
+
+	</script>
+</head>
+<body>
+	<div>
+		<input id="file-input" type="file" class="file">					  
+		<button id="processing" class="btn btn-primary btn-lg processingButton" data-toggle="modal" data-target="#processing-modal">Start Processing</button>   
+	</div>
+	<br>	
+	<div class="container" style="width:100%">
+		<ul id="dialogList" class="timeline">
+		</ul>
+	</div>
+	<br>
+	<button class="btn btn-primary processingButton" id="create" onclick="saveXML()"> Save </button>
+	<a download="new.xml" id="downloadlink" class="link">Download</a>
+	<div class="modal modal-static fade" id="processing-modal" role="dialog" aria-hidden="true">
+		<div class="modal-dialog">
+			<div class="modal-content">
+				<div class="modal-body">
+					<div class="text-center">
+						<img src="http://www.travislayne.com/images/loading.gif" class="icon" />
+						<h4>Processing... <button type="button" class="close" style="float: none;" data-dismiss="modal" aria-hidden="true">×</button></h4>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+	<div id="totopscroller"> </div>
+</body>
+</html>

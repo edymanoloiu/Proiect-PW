@@ -1,0 +1,264 @@
+.conversationBox {
+		border: 2px solid;
+		border-radius: 15px;
+		background-color: green;
+	}
+	
+	.id{
+		margin-left: 10px;
+	}
+	
+	.user{
+		float: right;
+		margin-right: 2%;
+	}
+	
+	.time{
+		float: right;
+		margin-right: 1%;
+	}
+	
+	.linkRef{
+		position: relative;
+		bottom: 8px;
+		float: right;
+		margin-right: 2%;
+		margin-bottom: 5px;
+		border-radius: 20px;
+	}
+	
+	p{
+		margin-left: 2%;
+	}
+	
+	.link{
+		display: none; 
+		float:right;
+		margin-right: 85%;
+	}
+	
+	.refID{
+		position: relative;
+		bottom: -1px;
+	}
+	
+	.radio{
+		float: left;
+		position: relative;
+		bottom: -4px;
+	}
+	
+	.idDialog{
+		font-size: small;
+	}
+	
+	.modal-static { 
+		position: fixed;
+		top: 50% !important; 
+		left: 50% !important; 
+		margin-top: -100px;  
+		margin-left: -100px; 
+		overflow: visible !important;
+	}
+	.modal-static,
+	.modal-static .modal-dialog,
+	.modal-static .modal-content {
+		width: 200px; 
+		height: 200px; 
+	}
+	.modal-static .modal-dialog,
+	.modal-static .modal-content {
+		padding: 0 !important; 
+		margin: 0 !important;
+	}
+	.modal-static .modal-content .icon {
+	}
+	
+	.processingButton{
+		height: 32px;
+		font-family: inherit;
+		font-size: 14px;
+		padding: 0px;
+		width: 100px;
+	}
+	.timeline {
+	  list-style: none;
+	  padding: 20px 0 20px;
+	  position: relative;
+	}
+	.timeline:before {
+	  top: 0;
+	  bottom: 0;
+	  position: absolute;
+	  content: " ";
+	  width: 3px;
+	  background-color: #eeeeee;
+	  left: 50%;
+	  margin-left: -1.5px;
+	}
+	.timeline > li {
+	  margin-bottom: 20px;
+	  position: relative;
+	}
+	.timeline > li:before,
+	.timeline > li:after {
+	  content: " ";
+	  display: table;
+	}
+	.timeline > li:after {
+	  clear: both;
+	}
+	.timeline > li:before,
+	.timeline > li:after {
+	  content: " ";
+	  display: table;
+	}
+	.timeline > li:after {
+	  clear: both;
+	}
+	.timeline > li > .timeline-panel {
+	  width: 50%;
+	  float: left;
+	  border: 1px solid #d4d4d4;
+	  border-radius: 2px;
+	  padding: 20px;
+	  position: relative;
+	  -webkit-box-shadow: 0 1px 6px rgba(0, 0, 0, 0.175);
+	  box-shadow: 0 1px 6px rgba(0, 0, 0, 0.175);
+	}
+	.timeline > li.timeline-inverted + li:not(.timeline-inverted),
+	.timeline > li:not(.timeline-inverted) + li.timeline-inverted {
+	margin-top: -60px;
+	}
+
+	.timeline > li:not(.timeline-inverted) {
+	padding-right:90px;
+	}
+
+	.timeline > li.timeline-inverted {
+	padding-left:90px;
+	}
+	.timeline > li > .timeline-panel:before {
+	  position: absolute;
+	  top: 26px;
+	  right: -15px;
+	  display: inline-block;
+	  border-top: 15px solid transparent;
+	  border-left: 15px solid #ccc;
+	  border-right: 0 solid #ccc;
+	  border-bottom: 15px solid transparent;
+	  content: " ";
+	}
+	.timeline > li > .timeline-panel:after {
+	  position: absolute;
+	  top: 27px;
+	  right: -14px;
+	  display: inline-block;
+	  border-top: 14px solid transparent;
+	  border-left: 14px solid #fff;
+	  border-right: 0 solid #fff;
+	  border-bottom: 14px solid transparent;
+	  content: " ";
+	}
+	.timeline > li > .timeline-badge {
+	  color: #fff;
+	  width: 50px;
+	  height: 50px;
+	  line-height: 50px;
+	  font-size: 1.9em;
+	  text-align: center;
+	  position: absolute;
+	  top: 16px;
+	  left: 50%;
+	  margin-left: -25px;
+	  background-color: #999999;
+	  z-index: 100;
+	  border-top-right-radius: 50%;
+	  border-top-left-radius: 50%;
+	  border-bottom-right-radius: 50%;
+	  border-bottom-left-radius: 50%;
+	}
+	.timeline > li.timeline-inverted > .timeline-panel {
+	  float: right;
+	}
+	.timeline > li.timeline-inverted > .timeline-panel:before {
+	  border-left-width: 0;
+	  border-right-width: 15px;
+	  left: -15px;
+	  right: auto;
+	}
+	.timeline > li.timeline-inverted > .timeline-panel:after {
+	  border-left-width: 0;
+	  border-right-width: 14px;
+	  left: -14px;
+	  right: auto;
+	}
+	.timeline-badge.primary {
+	  background-color: #2e6da4 !important;
+	}
+	.timeline-badge.success {
+	  background-color: #3f903f !important;
+	}
+	
+	.timeline-title {
+	  margin-top: 0;
+	  color: inherit;
+	}
+	.timeline-body > p,
+	.timeline-body > ul {
+	  margin-bottom: 0;
+	}
+	.timeline-body > p + p {
+	  margin-top: 5px;
+	}
+	
+	.text-muted{
+		font-size: 12px;
+	}
+	.dialogText{
+		font-size: 20px;
+	}
+	.timeline-title{
+		font-size: 25px;
+	}
+	
+	#totopscroller {
+		position: fixed;
+		right: 30px;
+		bottom: 30px;
+		width: 43px;
+	}
+	#totopscroller div {
+		width: 49px;
+		height: 43px;
+		position: relative;
+	}
+	#totopscroller a {
+		display: none;
+		background: url('totopicons.png');
+		width: 49px;
+		height: 43px;
+		display: block;
+		text-decoration: none;
+		border: medium none;
+		margin: 0 0 -1px;
+		border: 1px solid #949494;
+	}
+	.totopscroller-top {
+		background-position: 0 0 !important;
+	}
+	.totopscroller-lnk {
+		background-position: 0 -43px !important;
+	}
+	.totopscroller-prev {
+		background-position: 0 -129px !important;
+		position: absolute;
+		top: 0;
+		left: 0;
+	}
+	.totopscroller-bottom {
+		background-position: 0 -86px !important;
+		position: absolute;
+		top: 0;
+		left: 0;
+	}
